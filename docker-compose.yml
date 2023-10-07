@@ -3,6 +3,7 @@ services:
   covid-api:
     image: covid-api
     container_name: covid-api
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
