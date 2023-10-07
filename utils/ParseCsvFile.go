@@ -39,6 +39,12 @@ func ParseCsvFile(filePath string) (map[string]Country, error) {
 	// Create an array of countries
 	reports := map[string]Country{}
 
+	worldwide := Country{
+		CountryName: "Worldwide",
+		WHORegion:   "WW",
+		Reports:     []DailyReport{},
+	}
+
 	// Iterate through the records, starting at row 2
 	for i, row := range records {
 		if i == 0 {
@@ -71,12 +77,30 @@ func ParseCsvFile(filePath string) (map[string]Country, error) {
 			}
 		}
 
+		// Check if we already have a daily report for this date for worldwide
+		dateExists := false
+		for i, wwReport := range worldwide.Reports {
+			if wwReport.Date == date {
+				worldwide.Reports[i].NewCases += newCases
+				worldwide.Reports[i].NewDeaths += newDeaths
+				worldwide.Reports[i].CumulativeCases += cumulativeCases
+				worldwide.Reports[i].CumulativeDeaths += cumulativeDeaths
+				dateExists = true
+				break
+			}
+		}
+		if !dateExists {
+			worldwide.Reports = append(worldwide.Reports, report)
+		}
+
 		// Append the daily report to the country's report list
 		country.Reports = append(country.Reports, report)
 
 		// Store the country in the countries map
 		reports[countryCode] = country
 	}
+
+	reports["WW"] = worldwide
 
 	return reports, nil
 }
